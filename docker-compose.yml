@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ainyx
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # This automatically creates the users table when the DB starts!
+      - ./db/migrations/schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_SOURCE=postgresql://root:password@db:5432/ainyx?sslmode=disable
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
